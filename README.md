@@ -15,4 +15,9 @@ This file should be sourced in the .bashrc, or copy the content of dm.sh into .b
 
 Todo:
 
-Maybe it will be more convient to support the alias of a directory, but I don't want to make this simple tool too complex. 
+Alias support:
+
+ds -- can accept one parameter as the alias to the direcory. If not, a number will be assigned to the directory as the alias.
+
+dm -- can change to the directory directly if an alias of the directory as the only parameter is provided.
+

@@ -1,19 +1,28 @@
 #!/bin/bash
 
-ure the dirctory list file is existed
+# make sure the dirctory list file is existed
 touch ~/.dm
 
 # save the current directory into directory list
 function ds()
 {
+	s2=' #*'
+
+	count=1
 	while read LINE
 	do
-		if [[ $LINE == `pwd` ]]; then
+		if [[ ${LINE%$s2} == `pwd` ]]; then
 			return
 		fi
+		let count++
 	done < ~/.dm
 
-	echo `pwd` >> ~/.dm
+	echo -n `pwd` >> ~/.dm
+	if [[ $# -eq 1 ]]; then
+		echo " #$1" >> ~/.dm
+	else
+		echo " #$count" >> ~/.dm
+	fi
 }
 
 # view the directory list in vi, and you can edit it
@@ -25,6 +34,20 @@ function dv()
 #show the directory list, and change to the selected directory
 function dm()
 {
+	s1='/* #'
+	s2=' #*'
+
+	if [[ $# -eq 1 ]]; then
+		while read LINE
+		do
+			if [[ ${LINE##$s1} -eq $1 ]]; then
+				echo "Change to ${LINE%%$s2}"
+				cd $LINE
+				return
+			fi
+		done < ~/.dm
+	fi
+
 	cat -n ~/.dm
 
 	echo -n "Please choose the dirctory:"
@@ -35,7 +58,7 @@ function dm()
 	do
 		let count++
 		if [[ $count -eq $number ]]; then
-			echo "Change to $LINE"
+			echo "Change to ${LINE%%$s2}"
 			cd $LINE
 			break
 		fi

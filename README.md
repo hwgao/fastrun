@@ -1,0 +1,2 @@
+favorite-directories-of-bash
+============================

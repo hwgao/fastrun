@@ -4,31 +4,49 @@
 # save the current directory into favorite list
 function ds()
 {
-	if [ $# -eq 1 ] && [ $1 = -h ]; then
-		echo "Usage: ds [alias]"
-		echo "Save the current directory into favorite list"
-		echo "You can choose to provide an alias or not"
-		return
-	fi
-
-	s2=' #*'
+	local address="cd `pwd`"	
+	local s2=' #*'
+	OPTIND=1
 
 	# make sure the favorite list file is existed
 	if [ ! -e ~/.dm ]; then
 		touch ~/.dm
 	fi
 
-	count=1
+	while getopts "d:v" argv
+	do
+		case $argv in
+		d) 
+			address="$OPTARG"
+			break
+			;;
+		v)
+			vi ~/.dm
+			break
+			;;
+		*) 
+			echo "Usage: ds [-d command] [-v] [alias]"
+			echo "1. ds -- Save the command "cd to the current directory" into command list"
+			echo "2. ds alias -- Provide an alias for the current dirctory"
+			return 
+			;;
+		esac
+	done
+
+	echo address is "$address"
+
+	local count=1
 	while read LINE
 	do
-		if [ ${LINE%%$s2} == `pwd` ]; then
-			echo "The directory exists"
+		if [ "${LINE%$s2}" = "$address" ]; then
+			echo "The favorite exists"
 			return
 		fi
 		let count++
 	done < ~/.dm
 
-	echo -n `pwd` >> ~/.dm
+	echo -n $address >> ~/.dm
+	echo $#
 	if [ $# -eq 1 ]; then
 		echo " #$1" >> ~/.dm
 	else
@@ -67,15 +85,15 @@ function dm()
 		return
 	fi
 
-	s1='/* #'
+	s1='* #'
 	s2=' #*'
 
 	if [ $# -eq 1 ]; then
 		while read LINE
 		do
 			if [ ${LINE#$s1} -eq $1 ]; then
-				echo "Change to ${LINE%%$s2}"
-				cd $LINE
+				echo "Run \"${LINE%$s2}\""
+				$LINE
 				return
 			fi
 		done < ~/.dm
@@ -91,8 +109,8 @@ function dm()
 	do
 		let count++
 		if [ $count -eq $number ]; then
-			echo "Change to ${LINE%%$s2}"
-			cd $LINE
+			echo "Run \"${LINE%$s2}\""
+			$LINE
 			break
 		fi
 	done < ~/.dm

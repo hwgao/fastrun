@@ -1,6 +1,5 @@
 #!/bin/bash
 
-
 # save the current directory into favorite list
 function ds()
 {
@@ -12,7 +11,7 @@ function ds()
 		touch ~/.dm
 	fi
 
-	while getopts "d:v" argv
+	while getopts ":d:v" argv
 	do
 		case $argv in
 		d) 
@@ -26,42 +25,39 @@ function ds()
 		*) 
 			echo "Usage: ds [-d command] [-v]"
 			echo "1. ds -- Save the command "cd to the current directory" into command list"
+			echo "2. ds -d command -- save the command into the list"
+			echo "3. ds -v -- Show the command list for user to edit"
 			return 
 			;;
 		esac
 	done
 
-	echo address is "$address"
-
+	local LINE
 	local count=1
 	while read LINE
 	do
-		if [ "{$LINE}" = "$address" ]; then
+		if [ "$LINE" = "$address" ]; then
 			echo "The favorite exists"
 			return
 		fi
 		let count++
 	done < ~/.dm
 
-	echo -n $address >> ~/.dm
+	echo $address >> ~/.dm
 }
 
 #show the favorite list, and change to the selected directory
 function dm()
 {
-	local ss
 	OPTIND=1
 
-	while getopts "s:" argv
+	while getopts ":" argv
 	do
 		case $argv in
-		s)
-			echo search "$OPTARG"
-			ss=$OPTARG
-			;;
 		*) 
-			echo "Usage: dm [search]"
-			echo "1. dm -- Save the command "cd to the current directory" into command list"
+			echo "Usage: dm [string]"
+			echo "1. dm -- Show command list for user to choose one to run."
+			echo "2. dm string -- Show the commands which include the string."
 			return 
 			;;
 		esac
@@ -72,21 +68,27 @@ function dm()
 		return
 	fi
 
-	echo search string: $ss
+	if [ $# -eq 1 ]; then
+		cat -n ~/.dm | \grep -i "$1"
+	else
+		cat -n ~/.dm
+	fi
 
-	grep -n "$ss" ~/.dm
 
+	echo 
 	echo -n "Please choose the command:"
+	local number
 	read number
 
-	count=0
+	local LINE
+	local count=0
 	while read LINE
 	do
 		let count++
-		if [ $count -eq $number ]; then
+		if [ $count -eq "$number" ]; then
 			echo "Run \"${LINE}\""
-			$LINE
-			break
+			eval $LINE
+			return
 		fi
 	done < ~/.dm
 }

@@ -1,12 +1,19 @@
 #!/bin/bash
 
 
-# save the current directory into directory list
+# save the current directory into favorite list
 function ds()
 {
+	if [ $# -eq 1 ] && [ $1 = -h ]; then
+		echo "Usage: ds [alias]"
+		echo "Save the current directory into favorite list"
+		echo "You can choose to provide an alias or not"
+		return
+	fi
+
 	s2=' #*'
 
-	# make sure the dirctory list file is existed
+	# make sure the favorite list file is existed
 	if [ ! -e ~/.dm ]; then
 		touch ~/.dm
 	fi
@@ -15,6 +22,7 @@ function ds()
 	while read LINE
 	do
 		if [ ${LINE%%$s2} == `pwd` ]; then
+			echo "The directory exists"
 			return
 		fi
 		let count++
@@ -28,20 +36,33 @@ function ds()
 	fi
 }
 
-# view the directory list in vi, and you can edit it
+# view the favorite list in vi, and you can edit it
 function dv()
 {
-	if [ -e ~/.dm ] && [ -s ~/.dm ]; then
+	if [ $# -eq 1 ] && [ $1 = -h ]; then
+		echo "Usage: dv"
+		echo "View and edit favorite list in vi"
+		return
+	fi
+
+	if [ -s ~/.dm ]; then
 		vi ~/.dm
 	else  
 		echo "Dirctory list is empty"
 	fi
 }
 
-#show the directory list, and change to the selected directory
+#show the favorite list, and change to the selected directory
 function dm()
 {
-	if [ ! -e ~/.dm ] || [ ! -s ~/.dm ]; then
+	if [ $# -eq 1 ] && [ $1 = -h ]; then
+		echo "Usage: dm [alias]"
+		echo "If no alias as the only parameter, show the favorite list for the user to choose the directory to change to"
+		echo "If the alias is provided as the only parameter, change to the directory that the alias is represented"
+		return
+	fi
+
+	if [ ! -s ~/.dm ]; then
 		echo "Dirctory list is empty"
 		return
 	fi

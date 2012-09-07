@@ -5,7 +5,6 @@
 function ds()
 {
 	local address="cd `pwd`"	
-	local s2=' #*'
 	OPTIND=1
 
 	# make sure the favorite list file is existed
@@ -22,12 +21,11 @@ function ds()
 			;;
 		v)
 			vi ~/.dm
-			break
+			return 
 			;;
 		*) 
-			echo "Usage: ds [-d command] [-v] [alias]"
+			echo "Usage: ds [-d command] [-v]"
 			echo "1. ds -- Save the command "cd to the current directory" into command list"
-			echo "2. ds alias -- Provide an alias for the current dirctory"
 			return 
 			;;
 		esac
@@ -38,7 +36,7 @@ function ds()
 	local count=1
 	while read LINE
 	do
-		if [ "${LINE%$s2}" = "$address" ]; then
+		if [ "{$LINE}" = "$address" ]; then
 			echo "The favorite exists"
 			return
 		fi
@@ -46,62 +44,39 @@ function ds()
 	done < ~/.dm
 
 	echo -n $address >> ~/.dm
-	echo $#
-	if [ $# -eq 1 ]; then
-		echo " #$1" >> ~/.dm
-	else
-		echo " #$count" >> ~/.dm
-	fi
-}
-
-# view the favorite list in vi, and you can edit it
-function dv()
-{
-	if [ $# -eq 1 ] && [ $1 = -h ]; then
-		echo "Usage: dv"
-		echo "View and edit favorite list in vi"
-		return
-	fi
-
-	if [ -s ~/.dm ]; then
-		vi ~/.dm
-	else  
-		echo "Dirctory list is empty"
-	fi
 }
 
 #show the favorite list, and change to the selected directory
 function dm()
 {
-	if [ $# -eq 1 ] && [ $1 = -h ]; then
-		echo "Usage: dm [alias]"
-		echo "If no alias as the only parameter, show the favorite list for the user to choose the directory to change to"
-		echo "If the alias is provided as the only parameter, change to the directory that the alias is represented"
-		return
-	fi
+	local ss
+	OPTIND=1
+
+	while getopts "s:" argv
+	do
+		case $argv in
+		s)
+			echo search "$OPTARG"
+			ss=$OPTARG
+			;;
+		*) 
+			echo "Usage: dm [search]"
+			echo "1. dm -- Save the command "cd to the current directory" into command list"
+			return 
+			;;
+		esac
+	done
 
 	if [ ! -s ~/.dm ]; then
-		echo "Dirctory list is empty"
+		echo "Command list is empty"
 		return
 	fi
 
-	s1='* #'
-	s2=' #*'
+	echo search string: $ss
 
-	if [ $# -eq 1 ]; then
-		while read LINE
-		do
-			if [ ${LINE#$s1} -eq $1 ]; then
-				echo "Run \"${LINE%$s2}\""
-				$LINE
-				return
-			fi
-		done < ~/.dm
-	fi
+	grep -n "$ss" ~/.dm
 
-	cat -n ~/.dm
-
-	echo -n "Please choose the dirctory:"
+	echo -n "Please choose the command:"
 	read number
 
 	count=0
@@ -109,9 +84,11 @@ function dm()
 	do
 		let count++
 		if [ $count -eq $number ]; then
-			echo "Run \"${LINE%$s2}\""
+			echo "Run \"${LINE}\""
 			$LINE
 			break
 		fi
 	done < ~/.dm
 }
+
+alias dv='ds -v'

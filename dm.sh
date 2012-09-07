@@ -50,6 +50,9 @@ function ds()
 function dm()
 {
 	OPTIND=1
+	local number
+	local ssss
+
 
 	while getopts ":" argv
 	do
@@ -69,16 +72,21 @@ function dm()
 	fi
 
 	if [ $# -eq 1 ]; then
-		cat -n ~/.dm | \grep -i "$1"
+		if [ $1 -eq $1 2>/dev/null ]; then
+			number=$1
+		else
+			cat -n ~/.dm | \grep -i "$1"
+		fi
 	else
 		cat -n ~/.dm
 	fi
 
 
-	echo 
-	echo -n "Please choose the command:"
-	local number
-	read number
+	if [ -z "$number" ]; then
+		echo 
+		echo -n "Please choose the command:"
+		read number
+	fi
 
 	local LINE
 	local count=0
@@ -88,6 +96,7 @@ function dm()
 		if [ $count -eq "$number" ]; then
 			echo "Run \"${LINE}\""
 			eval $LINE
+			echo $LINE >> ~/.bash_history
 			return
 		fi
 	done < ~/.dm

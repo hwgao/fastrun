@@ -1,14 +1,15 @@
 #!/bin/bash
 
+FAV_LIST=~/.fk/.fk_list
 # save the current directory into favorite list
-function ds()
+function fs()
 {
 	local address="cd `pwd`"	
 	OPTIND=1
 
 	# make sure the favorite list file is existed
-	if [ ! -e ~/.dm ]; then
-		touch ~/.dm
+	if [ ! -e $FAV_LIST ]; then
+		touch $FAV_LIST
 	fi
 
 	while getopts ":d:v" argv
@@ -19,7 +20,7 @@ function ds()
 			break
 			;;
 		v)
-			vi ~/.dm
+			vi $FAV_LIST
 			return 
 			;;
 		*) 
@@ -41,13 +42,13 @@ function ds()
 			return
 		fi
 		let count++
-	done < ~/.dm
+	done < $FAV_LIST
 
-	echo $address >> ~/.dm
+	echo $address >> $FAV_LIST
 }
 
 #show the favorite list, and change to the selected directory
-function dm()
+function fk()
 {
 	OPTIND=1
 	local number
@@ -66,7 +67,7 @@ function dm()
 		esac
 	done
 
-	if [ ! -s ~/.dm ]; then
+	if [ ! -s $FAV_LIST ]; then
 		echo "Command list is empty"
 		return
 	fi
@@ -75,18 +76,29 @@ function dm()
 		if [ $1 -eq $1 2>/dev/null ]; then
 			number=$1
 		else
-			cat -n ~/.dm | \grep -i "$1"
+			result=`grep -c "$1" $FAV_LIST`
+			case $result in
+				0) 
+					echo "No match found"
+					return
+					;;
+				1)
+					echo "Found only one match, run it directly"
+					eval `grep "$1" $FAV_LIST`
+					return
+					;;
+				*)
+					cat -n $FAV_LIST | \grep -i "$1"
+					;;
+			esac
 		fi
 	else
-		cat -n ~/.dm
-	fi
-
-
-	if [ -z "$number" ]; then
+		cat -n $FAV_LIST
 		echo 
 		echo -n "Please choose the command:"
 		read number
 	fi
+
 
 	local LINE
 	local count=0
@@ -96,10 +108,9 @@ function dm()
 		if [ $count -eq "$number" ]; then
 			echo "Run \"${LINE}\""
 			eval $LINE
-			echo $LINE >> ~/.bash_history
 			return
 		fi
-	done < ~/.dm
+	done < $FAV_LIST
 }
 
-alias dv='ds -v'
+alias fv='fs -v'

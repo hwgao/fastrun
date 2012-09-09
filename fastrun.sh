@@ -1,15 +1,16 @@
 #!/bin/bash
 
-FAV_LIST=~/.fk/.fk_list
-# save the current directory into favorite list
+FR_LIST=~/.fr/.fr_list
+
+# save the current directory into fastrun list
 function fs()
 {
 	local address="cd `pwd`"	
 	OPTIND=1
 
 	# make sure the favorite list file is existed
-	if [ ! -e $FAV_LIST ]; then
-		touch $FAV_LIST
+	if [ ! -e $FR_LIST ]; then
+		touch $FR_LIST
 	fi
 
 	while getopts ":d:v" argv
@@ -20,14 +21,14 @@ function fs()
 			break
 			;;
 		v)
-			vi $FAV_LIST
+			vi $FR_LIST
 			return 
 			;;
 		*) 
-			echo "Usage: ds [-d command] [-v]"
-			echo "1. ds -- Save the command "cd to the current directory" into command list"
-			echo "2. ds -d command -- save the command into the list"
-			echo "3. ds -v -- Show the command list for user to edit"
+			echo "Usage: fs [-d command] [-v]"
+			echo "1. fs -- Save the command "cd to the current directory" into command list"
+			echo "2. fs -d command -- save the command into the list"
+			echo "3. fs -v -- Show the command list for user to edit"
 			return 
 			;;
 		esac
@@ -37,23 +38,21 @@ function fs()
 	local count=1
 	while read LINE
 	do
-		if [ "$LINE" = "$address" ]; then
+		if [ "${LINE% #*}" = "$address" ]; then
 			echo "The favorite exists"
 			return
 		fi
 		let count++
-	done < $FAV_LIST
+	done < $FR_LIST
 
-	echo $address >> $FAV_LIST
+	echo $address >> $FR_LIST
 }
 
-#show the favorite list, and change to the selected directory
-function fk()
+#show the fastrun list for the user to choose
+function fr()
 {
 	OPTIND=1
 	local number
-	local ssss
-
 
 	while getopts ":" argv
 	do
@@ -67,38 +66,43 @@ function fk()
 		esac
 	done
 
-	if [ ! -s $FAV_LIST ]; then
+	if [ ! -s $FR_LIST ]; then
 		echo "Command list is empty"
 		return
 	fi
 
-	if [ $# -eq 1 ]; then
+	if [ $# -gt 0 ]; then
 		if [ $1 -eq $1 2>/dev/null ]; then
 			number=$1
 		else
-			result=`grep -c "$1" $FAV_LIST`
+			result=`grep -ci "$1" $FR_LIST`
 			case $result in
 				0) 
 					echo "No match found"
-					return
+					cat -n $FR_LIST
+					echo 
+					echo -n "Please choose the command:"
+					read number
 					;;
 				1)
 					echo "Found only one match, run it directly"
-					eval `grep "$1" $FAV_LIST`
+					eval `\grep -i "$1" $FR_LIST`
 					return
 					;;
 				*)
-					cat -n $FAV_LIST | \grep -i "$1"
+					cat -n $FR_LIST | \grep -i --color=auto "$1"
+					echo 
+					echo -n "Please choose the command:"
+					read number
 					;;
 			esac
 		fi
 	else
-		cat -n $FAV_LIST
+		cat -n $FR_LIST
 		echo 
 		echo -n "Please choose the command:"
 		read number
 	fi
-
 
 	local LINE
 	local count=0
@@ -106,11 +110,11 @@ function fk()
 	do
 		let count++
 		if [ $count -eq "$number" ]; then
-			echo "Run \"${LINE}\""
+			echo "Run \"$LINE\""
 			eval $LINE
 			return
 		fi
-	done < $FAV_LIST
+	done < $FR_LIST
 }
 
 alias fv='fs -v'

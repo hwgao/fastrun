@@ -6,7 +6,7 @@ This is a simple bash script used to create a favorite commands list for bash.
 fs -- used to save a command into the list
 If no parameter, it will save "cd the current directory" into the list.
 If having any parameter, the parameter(s) will be saved into the list.
-If you want to add an alias to the command "cd the current directory", you can add one parameter -- "#alias" or \#alias.
+If you want to add an alias to the command "cd the current directory", you can add one parameter -- "@alias".
 
 fv -- use vi to view and edit the list
 
@@ -16,9 +16,9 @@ fr also supports with one parameter.
 a) If the parameter is a number, it will run the command at that line directly.
 b) If the parameter is a string, it will search the string in the command list, the matched commands will be listed for user to choose. If there is only one command matched, the command will also be directly run.
 	
-As the string started with # is the comment in bash, you can add an alias started with # at the end of the command. You should enclose the command with "". And you can use "fr #alias" to run the command directly.
-
 Notes:
 ============================
 . install.sh -- install fastrun
 . remove.sh -- remove the installed fastrun
+
+The string start of @ is alias. You can add @alias at the end of the command to assign an alias.

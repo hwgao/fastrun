@@ -35,7 +35,7 @@ function fs()
 		address="cd `pwd`"	
 	else
 		if [ $# -eq 1 ] && [ ${1:0:1} = "@" ];  then
-			address="cd `pwd` #${1:1}"
+			address="cd `pwd` $1"
 		else
 			address=$*
 		fi
@@ -45,7 +45,7 @@ function fs()
 	local count=1
 	while read LINE
 	do
-		if [ "${LINE% #*}" = "$address" ]; then
+		if [ "${LINE% @*}" = "$address" ]; then
 			echo "The favorite exists"
 			return
 		fi
@@ -93,7 +93,8 @@ function fr()
 					;;
 				1)
 					echo "Found only one match, run it directly"
-					eval `\grep -i "$1" $FR_LIST`
+					line=`\grep -i "$1" $FR_LIST`
+					eval ${line%@*}
 					return
 					;;
 				*)
@@ -118,7 +119,7 @@ function fr()
 		let count++
 		if [ $count -eq "$number" ]; then
 			echo "Run \"$LINE\""
-			eval $LINE
+			eval ${LINE%@*}
 			return
 		fi
 	done < $FR_LIST

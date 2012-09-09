@@ -15,7 +15,7 @@ fr also supports with one parameter.
 a) If the parameter is a number, it will run the command at that line directly.
 b) If the parameter is a string, it will search the string in the command list, the matched commands will be listed for user to choose. If there is only one command matched, the command will also be directly run.
 	
-As the string started with # is the comment in bash, you can add an alias started with # at the end of the command. And you can use "fr #alias" to run the command directly.
+As the string started with # is the comment in bash, you can add an alias started with # at the end of the command. You should enclose the command with "". And you can use "fr #alias" to run the command directly.
 
 Notes:
 ============================

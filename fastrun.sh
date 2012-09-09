@@ -5,8 +5,9 @@ FR_LIST=~/.fr/.fr_list
 # save the current directory into fastrun list
 function fs()
 {
-	local address="cd `pwd`"	
+	local address
 	OPTIND=1
+	IFS=' '
 
 	# make sure the favorite list file is existed
 	if [ ! -e $FR_LIST ]; then
@@ -16,10 +17,6 @@ function fs()
 	while getopts ":d:v" argv
 	do
 		case $argv in
-		d) 
-			address="$OPTARG"
-			break
-			;;
 		v)
 			vi $FR_LIST
 			return 
@@ -27,12 +24,18 @@ function fs()
 		*) 
 			echo "Usage: fs [-d command] [-v]"
 			echo "1. fs -- Save the command "cd to the current directory" into command list"
-			echo "2. fs -d command -- save the command into the list"
+			echo "2. fs command -- save the command into the list"
 			echo "3. fs -v -- Show the command list for user to edit"
 			return 
 			;;
 		esac
 	done
+
+	if [ $# -eq 0 ]; then
+		address="cd `pwd`"	
+	else
+		address=$*
+	fi
 
 	local LINE
 	local count=1

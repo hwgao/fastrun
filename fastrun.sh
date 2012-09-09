@@ -34,7 +34,11 @@ function fs()
 	if [ $# -eq 0 ]; then
 		address="cd `pwd`"	
 	else
-		address=$*
+		if [ $# -eq 1 ] && [ ${1:0:1} = "#" ];  then
+			address="cd `pwd` $1"
+		else
+			address=$*
+		fi
 	fi
 
 	local LINE

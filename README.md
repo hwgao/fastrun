@@ -4,8 +4,9 @@ fastrun
 This is a simple bash script used to create a favorite commands list for bash.
 
 fs -- used to save a command into the list
-If no parameter, it will save "cd" the current directory into the list.
+If no parameter, it will save "cd the current directory" into the list.
 If having any parameter, the parameter(s) will be saved into the list.
+If you want to add an alias to the command "cd the current directory", you can add one parameter -- "#alias" or \#alias.
 
 fv -- use vi to view and edit the list
 

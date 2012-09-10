@@ -60,6 +60,7 @@ function fr()
 {
 	OPTIND=1
 	local number
+	local LINE
 
 	while getopts ":" argv
 	do
@@ -78,32 +79,36 @@ function fr()
 		return
 	fi
 
-	if [ $# -gt 0 ]; then
-		if [ $1 -eq $1 2>/dev/null ]; then
-			number=$1
+	if [ $# -eq 1 ]; then
+		if [ ${1:0:1} = "@" ]; then
+			as=${1:0}	
 		else
-			result=`grep -ci "$1" $FR_LIST`
-			case $result in
-				0) 
-					echo "No match found"
-					cat -n $FR_LIST
-					echo 
-					echo -n "Please choose the command:"
-					read number
-					;;
-				1)
-					echo "Found only one match, run it directly"
-					line=`\grep -i "$1" $FR_LIST`
-					eval ${line%@*}
+			as=$1
+		fi
+
+		result=`\grep -c " @$as" $FR_LIST`
+		
+		if [ $result -eq 1 ]; then
+			LINE=`\grep " @$as" $FR_LIST`
+			echo "Run \"$LINE\""
+			eval ${LINE%@*}
+			return
+		else
+			if [ $1 -eq $1 2>/dev/null ]; then
+				number=$1
+			else
+				result=`\grep -c "$as" $FR_LIST`
+				if [ $result -eq 1 ]; then
+					LINE=`\grep "$as" $FR_LIST`
+					echo "Run \"$LINE\""
+					eval ${LINE%@*}
 					return
-					;;
-				*)
-					cat -n $FR_LIST | \grep -i --color=auto "$1"
+				else
 					echo 
 					echo -n "Please choose the command:"
 					read number
-					;;
-			esac
+				fi 
+			fi
 		fi
 	else
 		cat -n $FR_LIST
@@ -112,7 +117,6 @@ function fr()
 		read number
 	fi
 
-	local LINE
 	local count=0
 	while read LINE
 	do

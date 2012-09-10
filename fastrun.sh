@@ -104,6 +104,7 @@ function fr()
 					eval ${LINE%@*}
 					return
 				else
+					cat -n $FR_LIST
 					echo 
 					echo -n "Please choose the command:"
 					read number

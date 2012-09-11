@@ -87,7 +87,6 @@ function fr()
 
 	if [ $# -gt 0 ]; then
 		result=`\grep -cw "@$1" $FR_LIST`
-		echo "result=$result"
 		if [ $result -eq 1 ]; then
 			LINE=`\grep -w "@$1" $FR_LIST`
 			echo "Run \"$LINE\""

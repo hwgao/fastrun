@@ -15,7 +15,7 @@ function fs()
 		touch $FR_LIST
 	fi
 
-	while getopts ":c:a:v" argv; do
+	while getopts ":c:v" argv; do
 		case $argv in
 		v)
 			vi $FR_LIST
@@ -24,18 +24,21 @@ function fs()
 		c)
 			address=$OPTARG
 			;;
-		a)
-			aliass="@$OPTARG"
-			;;
 		*) 
-			echo "Usage: fs [-v] | [-c command] [-a alias]"
+			echo "Usage: fs [-v] | [-c command] [alias]"
 			echo "The option -v will trigger the vi to show the command list for user to edit"
 			echo "The option -c let the user to add a command. If no this option, cd the current path will be saved into the list"
-			echo "The option -a let the user to provide an alias for the command."	
+			echo "The user can also provide an alias for the command."	
 			return 
 			;;
 		esac
 	done
+
+	shift $(($OPTIND - 1))
+
+	if [ $# -gt 0 ]; then
+		aliass=@$1
+	fi
 	
 	if [ -z "$address" ]; then
 		address="cd `pwd`"	

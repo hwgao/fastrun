@@ -4,21 +4,23 @@ fastrun
 This is a simple bash script used to create a favorite commands list for bash.
 
 fs -- used to save a command into the list
-If no parameter, it will save "cd the current directory" into the list.
-If having any parameter, the parameter(s) will be saved into the list.
-If you want to add an alias to the command "cd the current directory", you can add one parameter -- "@alias".
+Usage: fs [-v] | [-c command] [alias]
+If no -c option, it will save "cd the current directory" into the list. Or it will save the command. 
+You can also provide an alias for the command.
 
 fv -- use vi to view and edit the list
+Actually it is an alias of fs -v
 
-fr -- show the list and prompt the user to choose a command to run
+fr
+Usage: fr [alias|number|string]
 
-fr also supports with one parameter. 
-a) If the parameter is a number, it will run the command at that line directly.
-b) If the parameter is a string, it will search the string in the command list, the matched commands will be listed for user to choose. If there is only one command matched, the command will also be directly run.
+If no parameter, show the command list for user to choose.
+
+fr also supports with one parameter to search in the command list. 
+It will search in the aliases first. If no result, and if the parameter is a number, it will check if it is a valid line number of the list. If not, do a global search in the list.
+If there is only one result, it will run it directly. For more than one results, the results will be listed for user to choose. 
 	
 Notes:
 ============================
 . install.sh -- install fastrun
 . remove.sh -- remove the installed fastrun
-
-The string start of @ is alias. You can add @alias at the end of the command to assign an alias.

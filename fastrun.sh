@@ -14,8 +14,7 @@ function fs()
 		touch $FR_LIST
 	fi
 
-	while getopts ":d:v" argv
-	do
+	while getopts ":d:v" argv; do
 		case $argv in
 		v)
 			vi $FR_LIST
@@ -43,8 +42,7 @@ function fs()
 
 	local LINE
 	local count=1
-	while read LINE
-	do
+	while read LINE; do
 		if [ "${LINE% @*}" = "$address" ]; then
 			echo "The favorite exists"
 			return
@@ -61,9 +59,9 @@ function fr()
 	OPTIND=1
 	local number
 	local LINE
+	local count
 
-	while getopts ":" argv
-	do
+	while getopts ":" argv; do
 		case $argv in
 		*) 
 			echo "Usage: dm [string]"
@@ -79,48 +77,64 @@ function fr()
 		return
 	fi
 
-	if [ $# -eq 1 ]; then
-		if [ ${1:0:1} = "@" ]; then
-			as=${1:0}	
-		else
-			as=$1
-		fi
+	local t=`wc -l $FR_LIST`
+	local tot=${t% *} 
+	let tot++
 
-		result=`\grep -c " @$as" $FR_LIST`
-		
+	if [ $# -gt 0 ]; then
+		result=`\grep -c " @$1" $FR_LIST`
 		if [ $result -eq 1 ]; then
-			LINE=`\grep " @$as" $FR_LIST`
+			LINE=`\grep " @$1" $FR_LIST`
 			echo "Run \"$LINE\""
 			eval ${LINE%@*}
 			return
 		else
-			if [ $1 -eq $1 2>/dev/null ]; then
+			if [[ $1 =~ ^[0-9]+$ ]] \
+					&& [ $1 -lt $tot ] \
+					&& [ $1 -gt 0 ]; then
+				echo "it is a number"
 				number=$1
 			else
-				result=`\grep -c "$as" $FR_LIST`
+				result=`\grep -c "$1" $FR_LIST`
 				if [ $result -eq 1 ]; then
 					LINE=`\grep "$as" $FR_LIST`
 					echo "Run \"$LINE\""
 					eval ${LINE%@*}
 					return
 				else
-					cat -n $FR_LIST
+					if [ $result -eq 0 ]; then
+						cat -n $FR_LIST
+					else
+						cat -n $FR_LIST | \grep --color=auto "$as"
+					fi
 					echo 
-					echo -n "Please choose the command:"
-					read number
+					read -p "Please choose the command:" number
 				fi 
 			fi
 		fi
 	else
 		cat -n $FR_LIST
 		echo 
-		echo -n "Please choose the command:"
-		read number
+		read -p "Please choose the command:" number
 	fi
 
-	local count=0
-	while read LINE
-	do
+
+	while true; do
+		if [[ ! ($number =~ ^[0-9]+$) ]]; then
+			read -p "Please input a number:" number
+			continue
+		fi
+
+		if [ $number -gt $tot ] || [ $number -lt 1 ]; then
+			read -p "Error number, try again:" number
+			continue
+		else
+			break
+		fi
+	done
+
+	count=0
+	while read LINE; do
 		let count++
 		if [ $count -eq "$number" ]; then
 			echo "Run \"$LINE\""
@@ -128,6 +142,8 @@ function fr()
 			return
 		fi
 	done < $FR_LIST
+
+	echo "Do not found your command:("	
 }
 
 alias fv='fs -v'

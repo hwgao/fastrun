@@ -5,39 +5,40 @@ FR_LIST=~/.fr/.fr_list
 # save the current directory into fastrun list
 function fs()
 {
-	local address
 	OPTIND=1
 	IFS=' '
+	local address
+	local aliass
 
 	# make sure the favorite list file is existed
 	if [ ! -e $FR_LIST ]; then
 		touch $FR_LIST
 	fi
 
-	while getopts ":d:v" argv; do
+	while getopts ":c:a:v" argv; do
 		case $argv in
 		v)
 			vi $FR_LIST
 			return 
 			;;
+		c)
+			address=$OPTARG
+			;;
+		a)
+			aliass="@$OPTARG"
+			;;
 		*) 
-			echo "Usage: fs [-d command] [-v]"
-			echo "1. fs -- Save the command "cd to the current directory" into command list"
-			echo "2. fs command -- save the command into the list"
-			echo "3. fs -v -- Show the command list for user to edit"
+			echo "Usage: fs [-v] | [-c command] [-a alias]"
+			echo "The option -v will trigger the vi to show the command list for user to edit"
+			echo "The option -c let the user to add a command. If no this option, cd the current path will be saved into the list"
+			echo "The option -a let the user to provide an alias for the command."	
 			return 
 			;;
 		esac
 	done
-
-	if [ $# -eq 0 ]; then
+	
+	if [ -z "$address" ]; then
 		address="cd `pwd`"	
-	else
-		if [ $# -eq 1 ] && [ ${1:0:1} = "@" ];  then
-			address="cd `pwd` $1"
-		else
-			address=$*
-		fi
 	fi
 
 	local LINE
@@ -50,7 +51,7 @@ function fs()
 		let count++
 	done < $FR_LIST
 
-	echo $address >> $FR_LIST
+	echo $address $aliass >> $FR_LIST
 }
 
 #show the fastrun list for the user to choose
@@ -64,9 +65,9 @@ function fr()
 	while getopts ":" argv; do
 		case $argv in
 		*) 
-			echo "Usage: dm [string]"
-			echo "1. dm -- Show command list for user to choose one to run."
-			echo "2. dm string -- Show the commands which include the string."
+			echo "Usage: fr [alias|number|string]"
+			echo "If no parameter, list the commands for user to choose."
+			echo "If with one parameter, it will first check if this parameter is matching with an alias. If not, check if this parameter is a number and match a line number in the list. If not, do a global search in this list. If there is only one result, run the corresponding command directly"
 			return 
 			;;
 		esac
@@ -82,22 +83,20 @@ function fr()
 	let tot++
 
 	if [ $# -gt 0 ]; then
-		result=`\grep -c " @$1" $FR_LIST`
+		result=`\grep -cw "@$1" $FR_LIST`
+		echo "result=$result"
 		if [ $result -eq 1 ]; then
-			LINE=`\grep " @$1" $FR_LIST`
+			LINE=`\grep -w "@$1" $FR_LIST`
 			echo "Run \"$LINE\""
 			eval ${LINE%@*}
 			return
 		else
-			if [[ $1 =~ ^[0-9]+$ ]] \
-					&& [ $1 -lt $tot ] \
-					&& [ $1 -gt 0 ]; then
-				echo "it is a number"
+			if [[ ($1 =~ ^[0-9]+$) && ($1 -lt $tot) && ($1 -gt 0) ]]; then
 				number=$1
 			else
 				result=`\grep -c "$1" $FR_LIST`
 				if [ $result -eq 1 ]; then
-					LINE=`\grep "$as" $FR_LIST`
+					LINE=`\grep "$1" $FR_LIST`
 					echo "Run \"$LINE\""
 					eval ${LINE%@*}
 					return
@@ -105,7 +104,7 @@ function fr()
 					if [ $result -eq 0 ]; then
 						cat -n $FR_LIST
 					else
-						cat -n $FR_LIST | \grep --color=auto "$as"
+						cat -n $FR_LIST | \grep --color=auto "$1"
 					fi
 					echo 
 					read -p "Please choose the command:" number
@@ -125,7 +124,7 @@ function fr()
 			continue
 		fi
 
-		if [ $number -gt $tot ] || [ $number -lt 1 ]; then
+		if [[ ($number -gt $tot) || ($number -lt 1) ]]; then
 			read -p "Error number, try again:" number
 			continue
 		else

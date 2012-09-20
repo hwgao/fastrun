@@ -24,3 +24,10 @@ Notes:
 ============================
 . install.sh -- install fastrun
 . remove.sh -- remove the installed fastrun
+
+Limitations:
+============================
+(List all the known limitations)
+. Can not execute the command which "source, vi"
+. Can not run other interactive script
+

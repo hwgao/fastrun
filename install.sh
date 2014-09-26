@@ -14,14 +14,15 @@ if [ -f ~/.bashrc ]; then
 	mkdir ~/.fr
 	cp ./fastrun.sh ~/.fr
 
-	echo "# Added by fastrun, please don't edit it manually" >> ~/.bashrc
-	echo "if [ -f ~/.fr/fastrun.sh ]; then # fastrun" >> ~/.bashrc
-	echo "    . ~/.fr/fastrun.sh # fastrun" >> ~/.bashrc
-	echo "fi # fastrun" >> ~/.bashrc
+	echo "# Following 4 lines are added by fastrun, please don't edit it manually" >> ~/.bashrc
+	echo "if [ -f ~/.fr/fastrun.sh ]; then" >> ~/.bashrc
+	echo "    . ~/.fr/fastrun.sh" >> ~/.bashrc
+	echo "fi" >> ~/.bashrc
 	echo "# fastrun end" >> ~/.bashrc
+
 	. ~/.bashrc
 else
-	echo ".bashrc file doesn't exist, install is failed"
+	echo ".bashrc file doesn't exist, installation is failed"
 	return
 fi
 
